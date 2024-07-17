@@ -25,6 +25,55 @@ pip install -e ".[dev]"
 ```
 
 # Usage
+Generally, looking at the tests is a fine way of understanding how to use the library. Here are some examples straight from the tests:
+
+## Batch calling the chat api via the `OpenAIChat` class
+
+```python
+from openai_batch_utils import OpenAIChat
+import pandas as pd
+
+
+prompt = ['what is the capital of netherlands',
+          'what is the capital of france',
+          'what is the capital of germany',
+          'what is the capital of italy',
+          'what is the capital of spain']
+
+system = """Reply in JSON format. Obey the following schema:
+{'city': `Capital`. 'country': `Country`}"""
+
+chat = OpenAIChat()
+# Here a small `batch_size` is used for demonstration.
+# In practice, one might like to vary between 500 - 3000 or depending on the usecase.
+result = chat.openai_chat(prompt=prompt,
+                          system_prompt=system,
+                          batch_size=3,
+                          model='gpt-3.5-turbo',
+                          response_format={'type': 'json_object'},
+                          sleep_interval=5,
+                          verbose=True)
+result = pd.DataFrame(result)
+print(result)
+```
+
+## Batch calling the embeddings via the `OpenAIEmbed` class
+
+```python
+from openai_batch_utils import OpenAIEmbed
+
+prompt = ['what is the capital of netherlands',
+          'what is the capital of france',
+          'what is the capital of germany',
+          'what is the capital of italy',
+          'what is the capital of spain']
+
+embed = OpenAIEmbed()
+# Here a small `batch_size` is used for demonstration.
+# In practice, one might like to vary between 500 - 3000 or depending on the usecase.
+result = embed.openai_embed(input=prompt, model='text-embedding-3-small', batch_size=3)
+print(result)
+```
 
 # Contributing
 Be kind, respectful, helpful, and we will get along just fine! Feel free to open issues, propose changes, or contribute to the codebase. Open to ideas, suggestions, and improvements.
