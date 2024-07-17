@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools >= 61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openai-batch-utils"
+authors = [
+  { name = "Jovan Veljanoski", email = "jovan.veljanoski@gmail.com" },
+]
+
+description = "Simple, helpful tools for batch async calls to OpenAI APIs."
+readme = "README.md"
+dependencies = [
+  "openai>=1,<2",
+  "tenacity>=8,<9",
+]
+
+dynamic = ["version"]
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.2.2,<8", "pandas>=2,<3"]
+
+[tool.setuptools]
+packages = ["openai_batch_utils"]
+
+[tool.setuptools.dynamic]
+version = { attr = "openai_batch_utils.__version__" }
