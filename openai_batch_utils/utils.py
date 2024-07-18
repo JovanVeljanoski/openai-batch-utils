@@ -1,6 +1,7 @@
 import asyncio
 import functools
 
+
 def async_to_sync(func):
     """
     A decorator that converts an asynchronous function to a synchronous function.
@@ -18,6 +19,7 @@ def async_to_sync(func):
     Raises:
         RuntimeError: If no event loop is running and the function is not called from an async context.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -32,4 +34,5 @@ def async_to_sync(func):
         else:
             # Either no event loop is running, or we're not inside async context
             return asyncio.run(func(*args, **kwargs))
+
     return wrapper

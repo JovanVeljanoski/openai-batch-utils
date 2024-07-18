@@ -21,20 +21,21 @@ class OpenAIChat(OpenAIBase):
         super().__init__(api_key=api_key, **kwargs)
 
     @async_to_sync
-    async def openai_chat(self,
-                          prompt: str | list,
-                          system_prompt: str = "",
-                          model: str = "gpt-4o-2024-05-13",
-                          max_tokens: int = 256,
-                          temperature: float = 1.0,
-                          top_p: float = 1.0,
-                          frequency_penalty: float = 0.0,
-                          presence_penalty: float = 0.0,
-                          response_format: dict = None,
-                          batch_size: int = 1000,
-                          sleep_interval: int = 60,
-                          verbose: bool = False,
-                          ) -> list[str]:
+    async def openai_chat(
+        self,
+        prompt: str | list,
+        system_prompt: str = "",
+        model: str = "gpt-4o-2024-05-13",
+        max_tokens: int = 256,
+        temperature: float = 1.0,
+        top_p: float = 1.0,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0,
+        response_format: dict = None,
+        batch_size: int = 1000,
+        sleep_interval: int = 60,
+        verbose: bool = False,
+    ) -> list[str]:
         """
         Generates chat responses using the OpenAI GPT model.
 
@@ -56,10 +57,9 @@ class OpenAIChat(OpenAIBase):
             list[str]: A list of generated chat responses.
         """
 
-
-        if type(prompt) == str:
+        if isinstance(prompt, str):
             prompt = [prompt]
-        if type(system_prompt) != str:
+        if not isinstance(system_prompt, str):
             raise ValueError("system_prompt must be a string. Only one system prompt is supported.")
 
         res: list = []
@@ -76,7 +76,7 @@ class OpenAIChat(OpenAIBase):
                     top_p=top_p,
                     frequency_penalty=frequency_penalty,
                     presence_penalty=presence_penalty,
-                    response_format=response_format
+                    response_format=response_format,
                 )
                 tasks.append(task)
             if verbose:
@@ -92,17 +92,18 @@ class OpenAIChat(OpenAIBase):
         return res
 
     @retry(wait=wait_random_exponential(min=10, max=80), stop=stop_after_attempt(11))
-    async def create_gpt_call_task(self,
-                                   prompt: str,
-                                   system_prompt: str,
-                                   model: str,
-                                   max_tokens: int,
-                                   temperature: float,
-                                   top_p: float,
-                                   frequency_penalty: float,
-                                   presence_penalty: float,
-                                   response_format: dict = None,
-                                   ) -> str | dict:
+    async def create_gpt_call_task(
+        self,
+        prompt: str,
+        system_prompt: str,
+        model: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+        frequency_penalty: float,
+        presence_penalty: float,
+        response_format: dict = None,
+    ) -> str | dict:
         """
         Creates a GPT call task using OpenAI's chat completions API.
 
@@ -124,10 +125,7 @@ class OpenAIChat(OpenAIBase):
             ValueError: If the response_format type is not recognized or supported.
 
         """
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ]
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]
 
         response = await self.client.chat.completions.create(
             model=model,
@@ -137,14 +135,14 @@ class OpenAIChat(OpenAIBase):
             top_p=top_p,
             frequency_penalty=frequency_penalty,
             presence_penalty=presence_penalty,
-            response_format=response_format
+            response_format=response_format,
         )
 
         raw_json = response.choices[0].message.content
 
         if response_format is None:
             return raw_json
-        elif response_format.get('type') == 'json_object':
+        elif response_format.get("type") == "json_object":
             return json.loads(raw_json)
         else:
             raise ValueError("response_format type not recognized or not supported. Use 'json_object' for a JSON object or None for a raw string.")

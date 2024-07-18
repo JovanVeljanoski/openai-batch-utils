@@ -29,6 +29,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install ".[dev]"
 
+    - name: Linting and code formatting
+      run: |
+        flake8 openai_batch_utils tests
+        black openai_batch_utils tests --check
+
     - name: Run tests
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

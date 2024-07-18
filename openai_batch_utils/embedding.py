@@ -5,7 +5,7 @@ from .utils import async_to_sync
 
 
 class OpenAIEmbed(OpenAIBase):
-    def __init__(self, api_key: str = None, **kwargs):
+    def __init__(self, api_key: str | None = None, **kwargs):
         """A class for generating (batch) embeddings using the OpenAI API.
 
         Args:
@@ -18,13 +18,14 @@ class OpenAIEmbed(OpenAIBase):
         super().__init__(api_key=api_key, **kwargs)
 
     @async_to_sync
-    async def openai_embed(self,
-                           input: str | list[str],
-                           model: list,
-                           batch_size: int = 1000,
-                           ) -> list[float] | list[list[float]]:
+    async def openai_embed(
+        self,
+        input: str | list[str],
+        model: list,
+        batch_size: int = 1000,
+    ) -> list[float] | list[list[float]]:
 
-        if type(input) == str:
+        if isinstance(input, str):
             input = [input]
 
         tasks = []
