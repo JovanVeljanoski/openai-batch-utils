@@ -25,7 +25,7 @@ class OpenAIChat(OpenAIBase):
         self,
         prompt: str | list,
         system_prompt: str = "",
-        model: str = "gpt-4o-2024-05-13",
+        model: str = "gpt-4o-mini-2024-07-18",
         max_tokens: int = 256,
         temperature: float = 1.0,
         top_p: float = 1.0,

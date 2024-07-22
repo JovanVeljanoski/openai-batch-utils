@@ -16,7 +16,7 @@ def test_openai_chat_basic(batch_size: int):
     ]
 
     chat = OpenAIChat()
-    result = chat.openai_chat(prompt=prompt, batch_size=batch_size, model="gpt-3.5-turbo", sleep_interval=5)
+    result = chat.openai_chat(prompt=prompt, batch_size=batch_size, model="gpt-4o-mini-2024-07-18", sleep_interval=5)
 
     assert len(result) == len(prompt)
     assert "amsterdam" in result[0].lower()
@@ -42,7 +42,7 @@ def test_openai_chat_json_mode(batch_size: int):
 
     chat = OpenAIChat()
     result = chat.openai_chat(
-        prompt=prompt, system_prompt=system, batch_size=batch_size, model="gpt-3.5-turbo", response_format={"type": "json_object"}, sleep_interval=5
+        prompt=prompt, system_prompt=system, batch_size=batch_size, model="gpt-4o-mini-2024-07-18", response_format={"type": "json_object"}, sleep_interval=5
     )
 
     assert len(result) == len(prompt)
