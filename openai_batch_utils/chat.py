@@ -35,6 +35,7 @@ class OpenAIChat(OpenAIBase):
         batch_size: int = 1000,
         sleep_interval: int = 60,
         verbose: bool = False,
+        return_message_only: bool = True,
     ) -> list[str]:
         """
         Generates chat responses using the OpenAI GPT model.
@@ -77,6 +78,7 @@ class OpenAIChat(OpenAIBase):
                     frequency_penalty=frequency_penalty,
                     presence_penalty=presence_penalty,
                     response_format=response_format,
+                    return_message_only=return_message_only,
                 )
                 tasks.append(task)
             if verbose:
@@ -103,6 +105,7 @@ class OpenAIChat(OpenAIBase):
         frequency_penalty: float,
         presence_penalty: float,
         response_format: dict = None,
+        return_message_only: bool = True,
     ) -> str | dict:
         """
         Creates a GPT call task using OpenAI's chat completions API.
@@ -138,11 +141,14 @@ class OpenAIChat(OpenAIBase):
             response_format=response_format,
         )
 
-        raw_json = response.choices[0].message.content
+        if return_message_only:
+            raw_json = response.choices[0].message.content
 
-        if response_format is None:
-            return raw_json
-        elif response_format.get("type") == "json_object":
-            return json.loads(raw_json)
+            if response_format is None:
+                return raw_json
+            elif response_format.get("type") == "json_object":
+                return json.loads(raw_json)
+            else:
+                raise ValueError("response_format type not recognized or not supported. Use 'json_object' for a JSON object or None for a raw string.")
         else:
-            raise ValueError("response_format type not recognized or not supported. Use 'json_object' for a JSON object or None for a raw string.")
+            return response
