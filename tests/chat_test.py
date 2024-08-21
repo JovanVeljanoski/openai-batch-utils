@@ -61,4 +61,22 @@ def test_system_prompt_not_string():
     system = ["This is not a string but a list"]
 
     with pytest.raises(ValueError):
-        chat.openai_chat(prompt=prompt, system_prompt=system, batch_size=1, model="gpt-3.5-turbo", sleep_interval=5)
+        chat.openai_chat(prompt=prompt, system_prompt=system, batch_size=1, model="gpt-4o-mini-2024-07-18", sleep_interval=5)
+
+
+def test_openai_chat_return_message_only_false():
+    chat = OpenAIChat()
+    prompt = ["What is the capital of France?", "What is the capital of Germany?"]
+    result = chat.openai_chat(prompt=prompt, return_message_only=False, batch_size=1, model="gpt-4o-mini-2024-07-18", sleep_interval=5)
+
+    assert isinstance(result, list)
+    assert hasattr(result[0], "choices")
+    assert hasattr(result[0].choices[0], "message")
+    assert hasattr(result[0].choices[0].message, "content")
+    assert hasattr(result[0].choices[0].message, "tool_calls")
+
+    assert isinstance(result, list)
+    assert hasattr(result[1], "choices")
+    assert hasattr(result[1].choices[0], "message")
+    assert hasattr(result[1].choices[0].message, "content")
+    assert hasattr(result[1].choices[0].message, "tool_calls")
