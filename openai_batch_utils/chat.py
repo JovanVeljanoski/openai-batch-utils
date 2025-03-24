@@ -1,7 +1,9 @@
 import asyncio
 import json
 
-from tenacity import retry, stop_after_attempt, wait_random_exponential
+from pydantic import BaseModel  # type: ignore
+
+from tenacity import retry, stop_after_attempt, wait_random_exponential  # type: ignore
 
 from .base import OpenAIBase
 from .utils import async_to_sync
@@ -31,11 +33,11 @@ class OpenAIChat(OpenAIBase):
         top_p: float = 1.0,
         frequency_penalty: float = 0.0,
         presence_penalty: float = 0.0,
-        response_format: dict = None,
+        response_format: dict | BaseModel = None,
         batch_size: int = 1000,
         sleep_interval: int = 60,
         verbose: bool = False,
-        return_message_only: bool = True,
+        return_parsed: bool = True,
     ) -> list[str]:
         """
         Generates chat responses using the OpenAI GPT model.
@@ -53,7 +55,7 @@ class OpenAIChat(OpenAIBase):
             batch_size (int, optional): The batch size for making API requests. Defaults to 1000.
             sleep_interval (int, optional): The sleep interval between batches to relieve the API. Defaults to 60.
             verbose (bool, optional): Whether to print verbose output. Defaults to False.
-
+            return_parsed (bool, optional): Whether to return the parsed response message. Defaults to True.
         Returns:
             list[str]: A list of generated chat responses.
         """
@@ -78,7 +80,7 @@ class OpenAIChat(OpenAIBase):
                     frequency_penalty=frequency_penalty,
                     presence_penalty=presence_penalty,
                     response_format=response_format,
-                    return_message_only=return_message_only,
+                    return_parsed=return_parsed,
                 )
                 tasks.append(task)
             if verbose:
@@ -104,8 +106,8 @@ class OpenAIChat(OpenAIBase):
         top_p: float,
         frequency_penalty: float,
         presence_penalty: float,
-        response_format: dict = None,
-        return_message_only: bool = True,
+        response_format: dict | BaseModel = None,
+        return_parsed: bool = True,
     ) -> str | dict:
         """
         Creates a GPT call task using OpenAI's chat completions API.
@@ -119,10 +121,10 @@ class OpenAIChat(OpenAIBase):
             top_p (float): Controls the diversity of the generated response. Lower values make the output more focused.
             frequency_penalty (float): Controls the penalty for using frequent tokens in the generated response.
             presence_penalty (float): Controls the penalty for using tokens that are not present in the input.
-            response_format (dict, optional): The format of the response. Defaults to None.
-
+            response_format (dict | BaseModel, optional): The format of the response. Defaults to None.
+            return_parsed (bool, optional): Whether to return the parsed response message. Defaults to True.
         Returns:
-            str or dict: The generated response in the specified format.
+            str | dict | BaseModel: The generated response in the specified format.
 
         Raises:
             ValueError: If the response_format type is not recognized or supported.
@@ -130,25 +132,43 @@ class OpenAIChat(OpenAIBase):
         """
         messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]
 
-        response = await self.client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            frequency_penalty=frequency_penalty,
-            presence_penalty=presence_penalty,
-            response_format=response_format,
-        )
+        if hasattr(response_format, "model_dump"):
+            response = await self.client.beta.chat.completions.parse(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+                response_format=response_format,
+            )
 
-        if return_message_only:
-            raw_json = response.choices[0].message.content
-
-            if response_format is None:
-                return raw_json
-            elif response_format.get("type") == "json_object":
-                return json.loads(raw_json)
+            if return_parsed:
+                return response.choices[0].message.parsed
             else:
-                raise ValueError("response_format type not recognized or not supported. Use 'json_object' for a JSON object or None for a raw string.")
+                return response
+
         else:
-            return response
+            response = await self.client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty,
+                response_format=response_format,
+            )
+
+            if return_parsed:
+                raw_json = response.choices[0].message.content
+
+                if response_format is None:
+                    return raw_json
+                elif response_format.get("type") == "json_object":
+                    return json.loads(raw_json)
+                else:
+                    raise ValueError("response_format type not recognized or not supported. Use 'json_object' for a JSON object or None for a raw string.")
+            else:
+                return response

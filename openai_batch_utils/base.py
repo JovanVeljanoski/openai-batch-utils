@@ -1,4 +1,4 @@
-import openai
+import openai  # type: ignore
 
 
 class OpenAIBase:
