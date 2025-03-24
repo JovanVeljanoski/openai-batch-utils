@@ -11,8 +11,9 @@ authors = [
 description = "Simple, helpful tools for batch async calls to OpenAI APIs."
 readme = "README.md"
 dependencies = [
-  "openai>=1,<2",
-  "tenacity>=8,<9"]
+  "openai>=1.68,<2",
+  "pydantic>=2.7,<3",
+  "tenacity>=9,<10"]
 
 dynamic = ["version"]
 requires-python = ">=3.11"
