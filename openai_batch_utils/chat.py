@@ -1,6 +1,8 @@
 import asyncio
 import json
 
+from openai._types import NOT_GIVEN, NotGiven  # type: ignore
+
 from pydantic import BaseModel  # type: ignore
 
 from tenacity import retry, stop_after_attempt, wait_random_exponential  # type: ignore
@@ -28,11 +30,11 @@ class OpenAIChat(OpenAIBase):
         prompt: str | list,
         system_prompt: str = "",
         model: str = "gpt-4o-mini-2024-07-18",
-        max_tokens: int = 256,
-        temperature: float = 1.0,
-        top_p: float = 1.0,
-        frequency_penalty: float = 0.0,
-        presence_penalty: float = 0.0,
+        max_tokens: int | NotGiven = NOT_GIVEN,
+        temperature: float | NotGiven = NOT_GIVEN,
+        top_p: float | NotGiven = NOT_GIVEN,
+        frequency_penalty: float | NotGiven = NOT_GIVEN,
+        presence_penalty: float | NotGiven = NOT_GIVEN,
         response_format: dict | BaseModel = None,
         batch_size: int = 1000,
         sleep_interval: int = 60,
